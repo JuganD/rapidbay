@@ -20,9 +20,9 @@ RUN ARCH=$(uname -m) && \
         apt-get update && \
         apt-get install -y --no-install-recommends cargo && \
         git clone --depth 1 --branch v2.0.0 https://github.com/kaegi/alass.git /tmp/alass && \
-        cd /tmp/alass && \
+        cd /tmp/alass/alass-cli && \
         cargo build --release && \
-        cp target/release/alass /usr/bin/alass && \
+        cp ../target/release/alass-cli /usr/bin/alass && \
         chmod +x /usr/bin/alass && \
         cd / && \
         rm -rf /tmp/alass /root/.cargo && \

@@ -11,8 +11,15 @@ RUN apt-get update && \
     python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
-# Download alass binary
-RUN wget https://github.com/kaegi/alass/releases/download/v2.0.0/alass-linux64 -O /usr/bin/alass && \
+# Download alass binary based on architecture
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+        wget https://github.com/kaegi/alass/releases/download/v2.0.0/alass-linux64 -O /usr/bin/alass; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+        wget https://github.com/kaegi/alass/releases/download/v2.0.0/alass-linux-arm64 -O /usr/bin/alass; \
+    else \
+        echo "Unsupported architecture: $ARCH" && exit 1; \
+    fi && \
     chmod +x /usr/bin/alass
 
 # Install UV

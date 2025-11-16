@@ -11,16 +11,27 @@ RUN apt-get update && \
     python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
-# Download alass binary based on architecture
+# Download or build alass binary based on architecture
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then \
-        wget https://github.com/kaegi/alass/releases/download/v2.0.0/alass-linux64 -O /usr/bin/alass; \
+        wget https://github.com/kaegi/alass/releases/download/v2.0.0/alass-linux64 -O /usr/bin/alass && \
+        chmod +x /usr/bin/alass; \
     elif [ "$ARCH" = "aarch64" ]; then \
-        wget https://github.com/kaegi/alass/releases/download/v2.0.0/alass-linux-arm64 -O /usr/bin/alass; \
+        apt-get update && \
+        apt-get install -y --no-install-recommends cargo && \
+        git clone --depth 1 --branch v2.0.0 https://github.com/kaegi/alass.git /tmp/alass && \
+        cd /tmp/alass && \
+        cargo build --release && \
+        cp target/release/alass /usr/bin/alass && \
+        chmod +x /usr/bin/alass && \
+        cd / && \
+        rm -rf /tmp/alass /root/.cargo && \
+        apt-get remove -y cargo && \
+        apt-get autoremove -y && \
+        rm -rf /var/lib/apt/lists/*; \
     else \
         echo "Unsupported architecture: $ARCH" && exit 1; \
-    fi && \
-    chmod +x /usr/bin/alass
+    fi
 
 # Install UV
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
